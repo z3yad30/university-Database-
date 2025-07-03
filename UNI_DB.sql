@@ -1,14 +1,31 @@
-use CaseStudy_4 ;
+USE CaseStudy_4;
 
-create table student(
-	studendId int primary key,
-	studentName varchar(200) not null ,
-	gender varchar(20) not null,
-	dateOfBirth date ,
-	email varchar(100) not null,
+-- =========================
+-- Drop tables if exist (for reruns)
+-- =========================
+IF OBJECT_ID('Attendance') IS NOT NULL DROP TABLE Attendance;
+IF OBJECT_ID('GradeScale') IS NOT NULL DROP TABLE GradeScale;
+IF OBJECT_ID('Enrollment') IS NOT NULL DROP TABLE Enrollment;
+IF OBJECT_ID('teaches') IS NOT NULL DROP TABLE teaches;
+IF OBJECT_ID('courseSchedule') IS NOT NULL DROP TABLE courseSchedule;
+IF OBJECT_ID('course') IS NOT NULL DROP TABLE course;
+IF OBJECT_ID('classRoom') IS NOT NULL DROP TABLE classRoom;
+IF OBJECT_ID('Department') IS NOT NULL DROP TABLE Department;
+IF OBJECT_ID('Professor') IS NOT NULL DROP TABLE Professor;
+IF OBJECT_ID('student') IS NOT NULL DROP TABLE student;
+
+-- =========================
+-- Students
+-- =========================
+CREATE TABLE student(
+    studendId INT PRIMARY KEY,
+    studentName VARCHAR(200) NOT NULL,
+    gender VARCHAR(20) NOT NULL,
+    dateOfBirth DATE,
+    email VARCHAR(100) NOT NULL
 );
 
-insert into student (studendId , studentName , gender , dateOfBirth , email ) values
+INSERT INTO student (studendId, studentName, gender, dateOfBirth, email) VALUES
 (1, 'Zeyad Mohamed', 'Male', '2003-04-05', 'zeyad.m@university.edu'),
 (2, 'Layla Hassan', 'Female', '2004-07-22', 'layla.h@university.edu'),
 (3, 'Omar Farouk', 'Male', '2002-11-10', 'omar.f@university.edu'),
@@ -20,13 +37,16 @@ insert into student (studendId , studentName , gender , dateOfBirth , email ) va
 (9, 'Ali Zaki', 'Male', '2002-05-25', 'ali.z@university.edu'),
 (10, 'Jana Mostafa', 'Female', '2004-10-09', 'jana.m@university.edu');
 
-select * from student 
+SELECT * FROM student;
 
-create table professor (
-	professorId int primary key , 
-	professorName varchar(200) not null,
-	professorEmail varchar(200) not null,
-	professorOfficeNumber int not null,
+-- =========================
+-- Professors
+-- =========================
+CREATE TABLE Professor (
+    professorId INT PRIMARY KEY,
+    professorName VARCHAR(200) NOT NULL,
+    professorEmail VARCHAR(200) NOT NULL,
+    professorOfficeNumber INT NOT NULL
 );
 
 INSERT INTO Professor (ProfessorID, ProfessorName, ProfessorEmail, ProfessorOfficeNumber) VALUES
@@ -36,28 +56,34 @@ INSERT INTO Professor (ProfessorID, ProfessorName, ProfessorEmail, ProfessorOffi
 (4, 'Dr. Mona Youssef', 'm.youssef@university.edu', 104),
 (5, 'Dr. Karim Nabil', 'k.nabil@university.edu', 105);
 
-select * from professor
+SELECT * FROM Professor;
 
-create table Department (
-	DepartmentName varchar(200) primary key,
-	HeadProfessorID INT,
+-- =========================
+-- Departments
+-- =========================
+CREATE TABLE Department (
+    DepartmentName VARCHAR(200) PRIMARY KEY,
+    HeadProfessorID INT,
     CONSTRAINT FK_Department_HeadProfessor FOREIGN KEY (HeadProfessorID)
         REFERENCES Professor(ProfessorID)
 );
 
 INSERT INTO Department (DepartmentName, HeadProfessorID) VALUES
-('Computer Science', 1),   -- Dr. Ahmed ElSherif
-('Information Systems', 2),-- Dr. Rania Hegazy
-('Software Engineering', 3),-- Dr. Tarek Saleh
-('Artificial Intelligence', 4), -- Dr. Mona Youssef
-('Data Science', 5);       -- Dr. Karim Nabil
+('Computer Science', 1),
+('Information Systems', 2),
+('Software Engineering', 3),
+('Artificial Intelligence', 4),
+('Data Science', 5);
 
-select * from department 
+SELECT * FROM Department;
 
-create table classRoom (
-	roomNumber int primary key,
-	capacity int not null, 
-	bulding varchar(100) not null
+-- =========================
+-- Classrooms
+-- =========================
+CREATE TABLE classRoom (
+    roomNumber INT PRIMARY KEY,
+    capacity INT NOT NULL,
+    bulding VARCHAR(100) NOT NULL
 );
 
 INSERT INTO classRoom (roomNumber, capacity, bulding) VALUES
@@ -72,15 +98,18 @@ INSERT INTO classRoom (roomNumber, capacity, bulding) VALUES
 (204, 30, 'Software Lab'),
 (205, 65, 'Information Systems Hall');
 
-select * from classRoom
+SELECT * FROM classRoom;
 
-create table course (
-	courseCode int primary key , 
-	courseTitle varchar(100) not null, 
-	CreditHours int not null ,
-	Departmentname varchar (200) , 
-	CONSTRAINT  Department_Name FOREIGN KEY (Departmentname)
-		REFERENCES department(DepartmentName)
+-- =========================
+-- Courses
+-- =========================
+CREATE TABLE course (
+    courseCode INT PRIMARY KEY,
+    courseTitle VARCHAR(100) NOT NULL,
+    CreditHours INT NOT NULL,
+    Departmentname VARCHAR(200),
+    CONSTRAINT Department_Name FOREIGN KEY (Departmentname)
+        REFERENCES Department(DepartmentName)
 );
 
 INSERT INTO course (courseCode, courseTitle, CreditHours, Departmentname) VALUES
@@ -97,15 +126,18 @@ INSERT INTO course (courseCode, courseTitle, CreditHours, Departmentname) VALUES
 
 SELECT * FROM course;
 
-create table teaches (
-	 teachesID int primary key ,
-	 professor_id int , 
-	 constraint professor_ID foreign key (professor_id)
-		references professor (professorId),
-	semester int not null,
-	CourseCode int , 
-	constraint course_code foreign key (courseCode)
-		references course (courseCode),
+-- =========================
+-- Teaches
+-- =========================
+CREATE TABLE teaches (
+    teachesID INT PRIMARY KEY,
+    professor_id INT,
+    semester INT NOT NULL,
+    CourseCode INT,
+    CONSTRAINT professor_ID FOREIGN KEY (professor_id)
+        REFERENCES Professor (professorId),
+    CONSTRAINT course_code FOREIGN KEY (CourseCode)
+        REFERENCES course (courseCode)
 );
 
 INSERT INTO teaches (teachesID, professor_id, semester, CourseCode) VALUES
@@ -120,17 +152,20 @@ INSERT INTO teaches (teachesID, professor_id, semester, CourseCode) VALUES
 (1009, 5, 1, 105),
 (1010, 5, 2, 205);
 
-select * from teaches
+SELECT * FROM teaches;
 
-create table Enrollment(
-	EnrollmentID int primary key , 
-	StudentID int ,
-	constraint FK_Student_ID foreign key (StudentID)
-		references student (studendId),
-	CourseCode int ,
-	constraint FK_Course_Code foreign key (CourseCode)
-		references course (courseCode),
-	grade int not null,
+-- =========================
+-- Enrollment
+-- =========================
+CREATE TABLE Enrollment (
+    EnrollmentID INT PRIMARY KEY,
+    StudentID INT,
+    CourseCode INT,
+    grade INT NOT NULL,
+    CONSTRAINT FK_Student_ID FOREIGN KEY (StudentID)
+        REFERENCES student (studendId),
+    CONSTRAINT FK_Course_Code FOREIGN KEY (CourseCode)
+        REFERENCES course (courseCode)
 );
 
 INSERT INTO Enrollment (EnrollmentID, StudentID, CourseCode, grade) VALUES
@@ -155,6 +190,74 @@ INSERT INTO Enrollment (EnrollmentID, StudentID, CourseCode, grade) VALUES
 (19, 10, 105, 76),
 (20, 10, 205, 90);
 
-select * from Enrollment
+SELECT * FROM Enrollment;
 
--- fadel courseSchuale 
+-- =========================
+-- courseSchedule (NEW)
+-- =========================
+CREATE TABLE courseSchedule (
+    scheduleID INT PRIMARY KEY IDENTITY(1,1),
+    courseCode INT NOT NULL,
+    roomNumber INT NOT NULL,
+    dayOfWeek VARCHAR(20) NOT NULL,
+    startTime TIME NOT NULL,
+    endTime TIME NOT NULL,
+    semester INT NOT NULL,
+    FOREIGN KEY (courseCode) REFERENCES course(courseCode),
+    FOREIGN KEY (roomNumber) REFERENCES classRoom(roomNumber)
+);
+
+INSERT INTO courseSchedule (courseCode, roomNumber, dayOfWeek, startTime, endTime, semester) VALUES
+(101, 101, 'Sunday', '09:00', '11:00', 1),
+(201, 102, 'Tuesday', '10:00', '12:00', 2),
+(102, 103, 'Monday', '11:00', '13:00', 1),
+(202, 104, 'Wednesday', '09:00', '11:00', 2),
+(103, 105, 'Sunday', '13:00', '15:00', 1),
+(203, 201, 'Tuesday', '12:00', '14:00', 2),
+(104, 202, 'Monday', '10:00', '12:00', 1),
+(204, 203, 'Thursday', '09:00', '11:00', 2),
+(105, 204, 'Wednesday', '11:00', '13:00', 1),
+(205, 205, 'Sunday', '15:00', '17:00', 2);
+
+SELECT * FROM courseSchedule;
+
+-- =========================
+-- Attendance (NEW)
+-- =========================
+CREATE TABLE Attendance (
+    attendanceID INT PRIMARY KEY IDENTITY(1,1),
+    studentID INT NOT NULL,
+    scheduleID INT NOT NULL,
+    attendanceDate DATE NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    FOREIGN KEY (studentID) REFERENCES student(studendId),
+    FOREIGN KEY (scheduleID) REFERENCES courseSchedule(scheduleID)
+);
+
+INSERT INTO Attendance (studentID, scheduleID, attendanceDate, status) VALUES
+(1, 1, '2025-03-01', 'Present'),
+(2, 1, '2025-03-01', 'Absent'),
+(3, 2, '2025-03-03', 'Present'),
+(4, 2, '2025-03-03', 'Present'),
+(5, 3, '2025-03-04', 'Late'),
+(6, 3, '2025-03-04', 'Present');
+
+SELECT * FROM Attendance;
+
+-- =========================
+-- GradeScale (NEW)
+-- =========================
+CREATE TABLE GradeScale (
+    gradeLetter VARCHAR(2) PRIMARY KEY,
+    minScore INT NOT NULL,
+    maxScore INT NOT NULL
+);
+
+INSERT INTO GradeScale (gradeLetter, minScore, maxScore) VALUES
+('A', 90, 100),
+('B', 80, 89),
+('C', 70, 79),
+('D', 60, 69),
+('F', 0, 59);
+
+SELECT * FROM GradeScale;
